@@ -43,17 +43,17 @@ namespace ft {
 
     /*
      * Iterator_traits - meta-info for iterator
-     * [Iter] - the iterator type to retrieve properties for
+     * [Iterator] - the iterator type to retrieve properties for
      * [T] - user's type, which can use like iterator
      * [typename] needs to identify type, not static property
      */
-    template<class Iter>
+    template<class Iterator>
     struct iterator_traits {
         typedef ptrdiff_t difference_type;
-        typedef typename Iter::value_type value_type;
-        typedef typename Iter::pointer pointer;
-        typedef typename Iter::reference reference;
-        typedef typename Iter::iterator_category iterator_category;
+        typedef typename Iterator::value_type value_type;
+        typedef typename Iterator::pointer pointer;
+        typedef typename Iterator::reference reference;
+        typedef typename Iterator::iterator_category iterator_category;
     };
 
     template<class T>
@@ -104,6 +104,106 @@ namespace ft {
     ) {
         return p_distance(first, second, typename iterator_traits<Iterator>::iterator_category());
     }
+
+    /*
+     * Reverse iterator
+     */
+    template<class Iterator>
+    class reverse_iterator : iterator<
+            typename iterator_traits<Iterator>::difference_type,
+            typename iterator_traits<Iterator>::value_type,
+            typename iterator_traits<Iterator>::pointer,
+            typename iterator_traits<Iterator>::reference,
+            typename iterator_traits<Iterator>::iterator_category
+    > {
+    protected:
+        Iterator it;
+    public:
+        typedef Iterator iterator_type;
+        typedef random_access_iterator_tag iterator_concept;
+        typedef typename iterator_traits<Iterator>::iterator_category iterator_category;
+        typedef typename iterator_traits<Iterator>::value_type value_type;
+        typedef typename iterator_traits<Iterator>::difference_type difference_type;
+        typedef typename iterator_traits<Iterator>::pointer pointer;
+        typedef typename iterator_traits<Iterator>::reference reference;
+
+        /*
+         * Member functions
+         * [explicit] prohibits the use of such construction: reverse_iterator it = type;
+         */
+        reverse_iterator() : it() {};
+
+        explicit reverse_iterator(iterator_type type) : it(type) {};
+
+        template<class U>
+        reverse_iterator(const reverse_iterator<U> &other) : it(other.base()) {}
+
+        ~reverse_iterator() {};
+
+        /*
+         * Operators
+         */
+        template<class U>
+        reverse_iterator &operator=(const reverse_iterator<U> &other) {
+            this->it = static_cast<reverse_iterator<Iterator> >(other.base());
+            return *this;
+        }
+
+        iterator_type base() const {
+            return this->it;
+        }
+
+        reference operator*() const {
+            // TODO?
+            return *(this->it);
+        }
+
+        pointer operator->() const {
+            return &(operator*());
+        }
+
+        reference operator[](difference_type n) const {
+            return *(*this + n);
+        }
+
+        reverse_iterator &operator++() {
+            return *(--(this->it));
+        }
+
+        reverse_iterator &operator--() {
+            return *(++(this->it));
+        }
+
+        reverse_iterator operator++(int) {
+            reverse_iterator to_return(*this);
+            (this->it)--;
+            return to_return;
+        }
+
+        reverse_iterator operator--(int) {
+            reverse_iterator to_return(*this);
+            (this->it)++;
+            return to_return;
+        }
+
+        reverse_iterator operator+(difference_type n) const {
+            return reverse_iterator(this->it - n);
+        }
+
+        reverse_iterator operator-(difference_type n) const {
+            return reverse_iterator(this->it + n);
+        }
+
+        reverse_iterator &operator+=(difference_type n) {
+            this->it -= n;
+            return *this;
+        }
+
+        reverse_iterator &operator-=(difference_type n) {
+            this->it += n;
+            return *this;
+        }
+    };
 }
 
 #endif
