@@ -154,8 +154,9 @@ namespace ft {
         }
 
         reference operator*() const {
-            // TODO?
-            return *(this->it);
+            Iterator to_return = this->it;
+            --to_return;
+            return *to_return;
         }
 
         pointer operator->() const {

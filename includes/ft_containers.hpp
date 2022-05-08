@@ -14,6 +14,7 @@
 # define FT_CONTAINERS_HPP
 
 # include <iostream>
+# include <memory>
 # include "ft_iterator.hpp"
 
 #endif
