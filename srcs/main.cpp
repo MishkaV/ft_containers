@@ -13,5 +13,7 @@
 #include "../includes/ft_containers.hpp"
 
 int main() {
-	std::cout << "Hello world!";
+    {
+        ft::vector<int> vec;
+    }
 }
