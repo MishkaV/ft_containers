@@ -499,6 +499,33 @@ namespace ft {
     }
 
     template<class T, class Allocator>
+    typename vector<T, Allocator>::iterator vector<T, Allocator>::erase(vector::iterator pos) {
+        iterator to_return = pos + 1;
+        if (this->vec_end - 1 != pos) {
+            for (pointer begin = pos; begin != this->vec_end; begin++)
+                *begin = *(begin + 1);
+            this->vec_end--;
+        } else
+            this->pop_back();
+        return to_return;
+    }
+
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::iterator vector<T, Allocator>::erase(
+            vector::iterator first,
+            vector::iterator last
+    ) {
+        iterator to_return = last;
+        size_t count = last - first;
+        size_t range_to_clone = this->vec_end - last + 1;
+
+        for (size_t i = 0; i < range_to_clone; i++, first++)
+            *first = *(last + i);
+        this->vec_end -= count;
+        return to_return;
+    }
+
+    template<class T, class Allocator>
     void vector<T, Allocator>::push_back(const value_type &value) {
         if (this->vec_end == this->vec_capacity) {
             size_t new_capacity = this->capacity() > 0 ? 2 * this->capacity() : 2;
@@ -508,12 +535,92 @@ namespace ft {
         this->vec_end++;
     }
 
+    template<class T, class Allocator>
+    void vector<T, Allocator>::pop_back() {
+        this->vec_end--;
+    }
 
     template<class T, class Allocator>
     typename vector<T, Allocator>::size_type vector<T, Allocator>::vector::capacity() const {
         return static_cast<size_type>(this->vec_capacity - this->vec_capacity);
     }
 
+    template<class T, class Allocator>
+    void vector<T, Allocator>::resize(vector::size_type count, value_type value) {
+        if (this->capacity() < count)
+            this->reserve(count);
+
+        for (pointer it = this->vec_end; it < this->vec_begin + count; ++it)
+            this->alloc.construct(it, value);
+
+        if (count < this->size())
+            for (pointer it = this->vec_begin + count; it < this->vec_end; ++it)
+                this->alloc.destroy(it);
+        this->vec_end = this->vec_begin + count;
+    }
+
+    template<class T, class Allocator>
+    void vector<T, Allocator>::swap(vector &other) {
+        pointer new_capacity = other.vec_capacity;
+        pointer new_begin = other.vec_begin;
+        pointer new_end = other.vec_end;
+        pointer new_alloc = other.alloc;
+
+        other.vec_capacity = this->vec_capacity;
+        other.vec_begin = this->vec_begin;
+        other.vec_end = this->vec_end;
+        other.alloc = this->alloc;
+
+        this->vec_capacity = new_capacity;
+        this->vec_begin = new_begin;
+        this->vec_end = new_end;
+        this->alloc = new_alloc;
+    }
+
+    /*
+     * Non-member functions
+     */
+    template<class T, class Allocator>
+    inline bool operator==(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs)
+    {
+        return equal(lhs.begin(), lhs.end(), rhs.begin()) && lhs.size() == rhs.size();
+    }
+
+    template<class T, class Allocator>
+    inline bool operator!=(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs)
+    {
+        return !(lhs == rhs);
+    }
+
+    template<class T, class Allocator>
+    inline bool operator<(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs)
+    {
+        return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    }
+
+    template<class T, class Allocator>
+    inline bool operator<=(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs)
+    {
+        return !(rhs < lhs);
+    }
+
+    template<class T, class Allocator>
+    inline bool operator>(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs)
+    {
+        return rhs < lhs;
+    }
+
+    template<class T, class Allocator>
+    inline bool operator>=(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs)
+    {
+        return !(lhs < rhs);
+    }
+
+    template<class T, class Allocator>
+    inline void swap(vector<T, Allocator>&lhs, vector<T, Allocator>&rhs)
+    {
+        lhs.swap(rhs);
+    }
 
     /*
      * Utils functions

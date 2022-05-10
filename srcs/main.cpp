@@ -136,4 +136,59 @@ int main() {
             std:: cout << *it << " ";
         std:: cout << "\n";
     }
+
+    {
+        std:: cout << "\nTEST 3\n";
+        ft::vector<int> vec;
+
+        vec.push_back(10);
+        vec.push_back(20);
+        vec.push_back(30);
+        vec.push_back(40);
+        vec.push_back(50);
+
+        std::cout << "Erase at pos\n";
+        std::cout << "Origin(vec):\n";
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+        std::cout << "Erase begin\n";
+        vec.erase(vec.begin());
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+
+        std::cout << "Erase end\n";
+        vec.erase(vec.end());
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+
+
+        std::cout << "Erase mid\n";
+        vec.erase(vec.begin() + 1);
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+
+        std::cout << "Erase range\n";
+        vec.push_back(10);
+        vec.push_back(20);
+        vec.push_back(30);
+
+        std::cout << "Origin(vec):\n";
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+        std::cout << "Erase all(without last):\n";
+        vec.erase(vec.begin(), vec.end() - 1);
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+    }
 }
