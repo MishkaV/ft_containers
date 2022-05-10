@@ -581,46 +581,40 @@ namespace ft {
      * Non-member functions
      */
     template<class T, class Allocator>
-    inline bool operator==(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs)
-    {
+    inline bool operator==(const vector<T, Allocator> &lhs, const vector<T, Allocator> &rhs) {
         return equal(lhs.begin(), lhs.end(), rhs.begin()) && lhs.size() == rhs.size();
     }
 
     template<class T, class Allocator>
-    inline bool operator!=(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs)
-    {
-        return !(lhs == rhs);
+    inline bool operator!=(const vector<T, Allocator> &lhs, const vector<T, Allocator> &rhs) {
+        return lhs != rhs;
     }
 
     template<class T, class Allocator>
-    inline bool operator<(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs)
-    {
+    inline bool operator<(const vector<T, Allocator> &lhs, const vector<T, Allocator> &rhs) {
         return lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
     }
 
     template<class T, class Allocator>
-    inline bool operator<=(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs)
-    {
-        return !(rhs < lhs);
+    inline bool operator<=(const vector<T, Allocator> &lhs, const vector<T, Allocator> &rhs) {
+        return rhs <= lhs;
     }
 
     template<class T, class Allocator>
-    inline bool operator>(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs)
-    {
-        return rhs < lhs;
+    inline bool operator>(const vector<T, Allocator> &lhs, const vector<T, Allocator> &rhs) {
+        return rhs > lhs;
     }
 
     template<class T, class Allocator>
-    inline bool operator>=(const vector<T, Allocator>& lhs, const vector<T, Allocator>& rhs)
-    {
-        return !(lhs < rhs);
+    inline bool operator>=(const vector<T, Allocator> &lhs, const vector<T, Allocator> &rhs) {
+        return lhs >= rhs;
     }
 
     template<class T, class Allocator>
-    inline void swap(vector<T, Allocator>&lhs, vector<T, Allocator>&rhs)
-    {
+    inline void swap(vector<T, Allocator> &lhs, vector<T, Allocator> &rhs) {
         lhs.swap(rhs);
     }
+
 
     /*
      * Utils functions
