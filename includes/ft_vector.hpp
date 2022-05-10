@@ -15,6 +15,7 @@
 
 # include <memory>
 # include "ft_iterator.hpp"
+# include "ft_types.hpp"
 
 
 namespace ft {
@@ -58,7 +59,7 @@ namespace ft {
         template<class InputIterator>
         vector(
                 InputIterator first,
-                InputIterator last,
+                typename enable_if<!is_integral<InputIterator>::value, InputIterator>::type last,
                 const allocator_type &alloc = allocator_type()
         );
 
@@ -155,9 +156,12 @@ namespace ft {
 
         void insert(iterator pos, size_type count, const value_type &value);
 
-        // TODO?
         template<class InputIterator>
-        void insert(iterator pos, InputIterator first, InputIterator last);
+        typename enable_if<!is_integral<InputIterator>::value, void>::type insert(
+                iterator position,
+                InputIterator first,
+                InputIterator last
+        );
 
 
         iterator erase(iterator pos);
@@ -191,7 +195,7 @@ namespace ft {
      */
     template<class T, class Allocator>
     vector<T, Allocator>::vector(
-            vector::size_type count,
+            size_type count,
             const value_type &value,
             const allocator_type &alloc
     ) : alloc(alloc), vec_begin(0), vec_end(0), vec_capacity(0) {
@@ -213,7 +217,7 @@ namespace ft {
     template<class InputIterator>
     vector<T, Allocator>::vector(
             InputIterator first,
-            InputIterator last,
+            typename enable_if<!is_integral<InputIterator>::value, InputIterator>::type last,
             const allocator_type &alloc
     ): alloc(alloc), vec_begin(0), vec_end(0), vec_capacity(0) {
         while (first != last) {
@@ -244,7 +248,6 @@ namespace ft {
     }
 
 
-
     /*
      * Member functions - [Destructor]
      */
@@ -252,7 +255,6 @@ namespace ft {
     vector<T, Allocator>::~vector() {
         this->clear();
     }
-
 
 
     /*
@@ -268,7 +270,6 @@ namespace ft {
             this->push_back(*begin);
         return *this;
     }
-
 
 
     /*
@@ -292,7 +293,6 @@ namespace ft {
     }
 
 
-
     /*
      * Member functions - [get_allocator]
      */
@@ -300,7 +300,6 @@ namespace ft {
     typename vector<T, Allocator>::allocator_type vector<T, Allocator>::get_allocator() const {
         return this->alloc;
     }
-
 
 
     /*
@@ -355,7 +354,6 @@ namespace ft {
     }
 
 
-
     /*
      * Iterators
      */
@@ -396,9 +394,8 @@ namespace ft {
 
     template<class T, class Allocator>
     typename vector<T, Allocator>::vector::const_reverse_iterator vector<T, Allocator>::rend() const {
-        return  reverse_iterator(this->vec_begin());
+        return reverse_iterator(this->vec_begin());
     }
-
 
 
     /*
@@ -434,7 +431,6 @@ namespace ft {
     }
 
 
-
     /*
      * Modifiers
      */
@@ -444,6 +440,62 @@ namespace ft {
         this->vec_begin = 0;
         this->vec_end = 0;
         this->vec_capacity = 0;
+    }
+
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::vector::iterator
+    vector<T, Allocator>::insert(vector::iterator pos, const value_type &value) {
+        if (this->vec_end - 1 != pos) {
+            if (this->size() == this->capacity() - 1)
+                this->reserve(2 * this->size());
+
+            for (pointer end = this->vec_end; end != pos; end--)
+                *end = *(end - 1);
+            this->vec_end++;
+            *pos = value;
+        } else
+            this->push_back(*pos);
+        return this->vec_begin;
+    }
+
+    template<class T, class Allocator>
+    void vector<T, Allocator>::insert(vector::iterator pos, vector::size_type count, const value_type &value) {
+        if (this->vec_end - 1 != pos) {
+            if (this->size() >= this->capacity() - count)
+                this->reserve(2 * (this->size() + count));
+
+            for (pointer end = this->vec_end + count - 1; end != pos; end--)
+                *end = *(end - count);
+
+            this->vec_end += count;
+            for (size_t i = 0; i < count; i++, pos++)
+                *pos = value;
+        } else
+            for (size_t i = 0; i < count; i++)
+                this->push_back(value);
+    }
+
+    template<class T, class Allocator>
+    template<class InputIterator>
+    typename enable_if<!is_integral<InputIterator>::value, void>::type
+    vector<T, Allocator>::insert(
+            vector::iterator pos,
+            InputIterator first,
+            InputIterator last
+    ) {
+        size_t count = last - first;
+        if (this->vec_end - 1 != pos) {
+            if (this->size() == this->capacity() - count)
+                this->reserve(2 * (this->size() + count));
+
+            for (pointer end = this->vec_end + count - 1; end != pos; end--)
+                *end = *(end - count);
+            this->vec_end += count;
+            for (size_t i = 0; i < count; i++, pos++, first++)
+                *pos = *first;
+        } else
+            for (size_t i = 0; i < count; i++, first++)
+                this->push_back(*first);
     }
 
     template<class T, class Allocator>
@@ -463,7 +515,6 @@ namespace ft {
     }
 
 
-
     /*
      * Utils functions
      */
@@ -474,7 +525,6 @@ namespace ft {
             this->alloc.destroy(this->vec_begin + i);
         this->alloc.deallocate(this->vec_begin, len);
     }
-
 
 
 }

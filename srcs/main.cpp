@@ -10,6 +10,7 @@
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <vector>
 #include "../includes/ft_containers.hpp"
 
 int main() {
@@ -44,5 +45,95 @@ int main() {
 
         vec.get_allocator().destroy(pointer);
         vec.get_allocator().deallocate(pointer, 1);
+    }
+
+    {
+        std:: cout << "\nTEST 3\n";
+        ft::vector<int> vec;
+
+        vec.push_back(1);
+        vec.push_back(2);
+        vec.push_back(3);
+
+        std::cout << "Origin:\n";
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+        std::cout << "Insert begin:\n";
+        vec.insert(vec.begin(), 0);
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+        std::cout << "Insert end:\n";
+        vec.insert( vec.end(), 4);
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+        std::cout << "Insert mid:\n";
+        vec.insert( vec.begin() + 1, 10);
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+
+
+        size_t count = 2;
+        std::cout << "\nCheck insert dubl:\n";
+        std::cout << "Origin:\n";
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+        std::cout << "Insert begin:\n";
+        vec.insert(vec.begin(), count,11);
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+        std::cout << "Insert end:\n";
+        vec.insert( vec.end(), count,12);
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+        std::cout << "Insert mid:\n";
+        vec.insert( vec.begin() + 1, count,13);
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+
+        vec.clear();
+        vec.push_back(10);
+        vec.push_back(10);
+        vec.push_back(10);
+
+        ft::vector<int> vec2(4,3);
+        std::cout << "\nCheck insert range:\n";
+        std::cout << "Origin(vec):\n";
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+        std::cout << "Insert begin:\n";
+        vec.insert(vec.begin(), vec2.begin(), vec2.end());
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+        std::cout << "Insert end:\n";
+        vec.insert(vec.end(), vec2.begin(), vec2.end());
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
+
+        std::cout << "Insert mid:\n";
+        vec.insert( vec.begin() + 1, vec2.begin(), vec2.end());
+        for (ft::vector<int>::iterator it = vec.begin(); it != vec.end(); it++)
+            std:: cout << *it << " ";
+        std:: cout << "\n";
     }
 }
