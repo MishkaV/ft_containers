@@ -55,8 +55,6 @@ namespace ft {
                 const allocator_type &alloc = allocator_type()
         );
 
-        explicit vector(size_type count);
-
         template<class InputIterator>
         vector(
                 InputIterator first,
@@ -212,6 +210,41 @@ namespace ft {
         }
     }
 
+    template<class T, class Allocator>
+    template<class InputIterator>
+    vector<T, Allocator>::vector(
+            InputIterator first,
+            InputIterator last,
+            const allocator_type &alloc
+    ): alloc(alloc), vec_begin(0), vec_end(0), vec_capacity(0) {
+        while (first != last) {
+            push_back(*first);
+            first++;
+        }
+    }
+
+    template<class T, class Allocator>
+    vector<T, Allocator>::vector(const vector &x): alloc(x.alloc), vec_begin(0), vec_end(0), vec_capacity(0) {
+        size_t len = x.size();
+
+        if (len > 0) {
+            if (max_size() < 2 * len)
+                throw std::length_error("Max capacity of vector");
+
+            this->vec_begin = this->vec_end = this->alloc.allocate(2 * len);
+            vec_capacity = vec_begin + 2 * len;
+
+            pointer begin_x = x.vec_begin;
+            for (size_t i = 0; i < len; i++) {
+                this->alloc.construct(this->vec_end, *begin_x);
+                this->vec_end++;
+                begin_x++;
+            }
+
+        }
+    }
+
+
     /*
      * Member functions - [Destructor]
      */
@@ -220,14 +253,138 @@ namespace ft {
         this->clear();
     }
 
+
+    /*
+     * Member functions - [operator=]
+     */
+    template<class T, class Allocator>
+    vector<T, Allocator> &vector<T, Allocator>::operator=(const vector &other) {
+        if (this == &other)
+            return *this;
+        this->clear();
+        this->alloc = other.alloc;
+        for (pointer begin = other.vec_begin; begin != other.vec_end; begin++)
+            this->push_back(*begin);
+        return *this;
+    }
+
+
+    /*
+     * Member functions - [assign]
+     */
+    template<class T, class Allocator>
+    void vector<T, Allocator>::assign(vector::size_type count, const value_type &value) {
+        this->clear();
+        for (size_t i = 0; i < count; i++)
+            this->push_back(value);
+    }
+
+    template<class T, class Allocator>
+    template<class InputIterator>
+    void vector<T, Allocator>::assign(InputIterator first, InputIterator last) {
+        this->clear();
+        while (first != last) {
+            this->push_back(*first);
+            first++;
+        }
+    }
+
+
+    /*
+     * Member functions - [get_allocator]
+     */
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::allocator_type vector<T, Allocator>::get_allocator() const {
+        return this->alloc;
+    }
+
+
+    /*
+     * Element access
+     */
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::reference vector<T, Allocator>::at(vector::size_type pos) {
+        if (pos >= this->size())
+            throw std::out_of_range("Position out of range");
+        return *(this->vec_begin + pos);
+    }
+
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::const_reference vector<T, Allocator>::at(vector::size_type pos) const {
+        if (pos >= this->size())
+            throw std::out_of_range("Position out of range");
+        return *(this->vec_begin + pos);
+    }
+
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::reference vector<T, Allocator>::operator[](vector::size_type pos) {
+        if (pos >= this->size())
+            throw std::out_of_range("Position out of range");
+        return *(this->vec_begin + pos);
+    }
+
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::const_reference vector<T, Allocator>::operator[](vector::size_type pos) const {
+        if (pos >= this->size())
+            throw std::out_of_range("Position out of range");
+        return *(this->vec_begin + pos);
+    }
+
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::reference vector<T, Allocator>::front() {
+        return *(this->vec_begin);
+    }
+
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::const_reference vector<T, Allocator>::front() const {
+        return *(this->vec_begin);
+    }
+
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::reference vector<T, Allocator>::back() {
+        return *(this->vec_end - 1);
+    }
+
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::const_reference vector<T, Allocator>::back() const {
+        return *(this->vec_end - 1);
+    }
+
+
+    /*
+     * Iterators
+     */
+
+
+
+
     /*
      * Capacity
      */
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::size_type vector<T, Allocator>::size() const {
+        return static_cast<size_type>(this->vec_end - this->vec_begin);
+    }
+
     template<class T, class Allocator>
     typename vector<T, Allocator>::size_type vector<T, Allocator>::max_size() const {
         //TODO?
         return std::min<T>(std::numeric_limits<size_type>::max(), this->alloc.max_size());
     }
+
+    template<class T, class Allocator>
+    void vector<T, Allocator>::reserve(vector::size_type new_cap) {
+        if (this->capacity() < new_cap) {
+            pointer new_begin = this->alloc.allocate(new_cap);
+            pointer new_end = new_begin;
+            for (pointer old_begin = this->vec_begin; old_begin != this->vec_end; old_begin++, new_end++)
+                this->alloc.construct(new_end, *old_begin);
+            this->vec_begin = new_begin;
+            this->vec_end = new_end;
+            this->vec_capacity = this->vec_begin + new_cap;
+        }
+    }
+
 
     /*
      * Modifiers
@@ -240,6 +397,23 @@ namespace ft {
         this->vec_capacity = 0;
     }
 
+    template<class T, class Allocator>
+    void vector<T, Allocator>::push_back(const value_type &value) {
+        if (this->vec_end == this->vec_capacity) {
+            size_t new_capacity = this->capacity() > 0 ? 2 * this->capacity() : 2;
+            this->reserve(new_capacity);
+        }
+        this->alloc.construct(this->vec_end, value);
+        this->vec_end++;
+    }
+
+
+    template<class T, class Allocator>
+    typename vector<T, Allocator>::size_type vector<T, Allocator>::vector::capacity() const {
+        return static_cast<size_type>(this->vec_capacity - this->vec_capacity);
+    }
+
+
     /*
      * Utils functions
      */
@@ -250,7 +424,6 @@ namespace ft {
             this->alloc.destroy(this->vec_begin + i);
         this->alloc.deallocate(this->vec_begin, len);
     }
-
 
 }
 
