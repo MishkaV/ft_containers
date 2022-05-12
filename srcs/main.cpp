@@ -191,4 +191,24 @@ int main() {
             std:: cout << *it << " ";
         std:: cout << "\n";
     }
+
+    //Stack
+    {
+        std:: cout << "\nTEST 4\n";
+
+        ft::stack<int> stk;
+        stk.push(1);
+        stk.push(2);
+        stk.push(3);
+
+        std:: cout << "Size(3) of stack = " << stk.size() << "\n";
+
+        std:: cout << "Pop";
+        stk.pop();
+        std:: cout << "Size(2) of stack = " << stk.size() << "\n";
+
+        std:: cout << "Stack is empty(false) = " << stk.empty() << "\n";
+
+        std:: cout << "Top element(2) is " << stk.top() << "\n";
+    }
 }

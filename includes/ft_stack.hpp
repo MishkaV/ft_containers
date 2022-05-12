@@ -34,7 +34,7 @@ namespace ft {
     protected:
         container_type container;
 
-    private:
+    public:
         /*
          * Constructor
          */
@@ -50,6 +50,8 @@ namespace ft {
          * Member functions
          */
         size_type size() const { return container.size(); }
+
+        bool empty() const { return container.empty(); }
 
         value_type &top() { return container.back(); }
 

@@ -17,4 +17,8 @@
 # include <memory>
 # include "ft_iterator.hpp"
 # include "ft_vector.hpp"
+# include "ft_extensions.hpp"
+# include "ft_types.hpp"
+# include "ft_stack.hpp"
+# include "ft_pair.hpp"
 #endif
