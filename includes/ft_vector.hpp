@@ -16,6 +16,7 @@
 # include <memory>
 # include "ft_iterator.hpp"
 # include "ft_types.hpp"
+# include "ft_extensions.hpp"
 
 
 namespace ft {
@@ -576,6 +577,8 @@ namespace ft {
         this->vec_end = new_end;
         this->alloc = new_alloc;
     }
+
+
 
     /*
      * Non-member functions
