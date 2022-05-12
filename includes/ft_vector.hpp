@@ -590,7 +590,7 @@ namespace ft {
 
     template<class T, class Allocator>
     inline bool operator!=(const vector<T, Allocator> &lhs, const vector<T, Allocator> &rhs) {
-        return lhs != rhs;
+        return !(rhs == lhs);
     }
 
     template<class T, class Allocator>
@@ -600,17 +600,17 @@ namespace ft {
 
     template<class T, class Allocator>
     inline bool operator<=(const vector<T, Allocator> &lhs, const vector<T, Allocator> &rhs) {
-        return rhs <= lhs;
+        return !(rhs < lhs);
     }
 
     template<class T, class Allocator>
     inline bool operator>(const vector<T, Allocator> &lhs, const vector<T, Allocator> &rhs) {
-        return rhs > lhs;
+        return rhs < lhs;
     }
 
     template<class T, class Allocator>
     inline bool operator>=(const vector<T, Allocator> &lhs, const vector<T, Allocator> &rhs) {
-        return lhs >= rhs;
+        return !(lhs < rhs);
     }
 
     template<class T, class Allocator>
