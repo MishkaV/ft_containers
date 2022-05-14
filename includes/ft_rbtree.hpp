@@ -17,10 +17,10 @@
 # include <memory>
 # include "ft_iterator.hpp"
 # include "ft_extensions.hpp"
+# include "ft_pair.hpp"
 
 
 namespace ft {
-
 
     /*
      * Node for red-black tree
@@ -96,11 +96,21 @@ namespace ft {
 
     private:
         explicit iterator_rbtree(pointer_node node) : current(node) {}
-        template <class> friend class map_iterator;
-        template <class, class> friend class const_iterator_rbtree;
-        template <class, class, class> friend class rbtree;
-        template <class, class, class> friend class set;
-        template <class, class, class, class> friend class map;
+
+        template<class> friend
+        class map_iterator;
+
+        template<class, class> friend
+        class const_iterator_rbtree;
+
+        template<class, class, class> friend
+        class rbtree;
+
+        template<class, class, class> friend
+        class set;
+
+        template<class, class, class, class> friend
+        class map;
 
     public:
         iterator_rbtree() : current() {};
@@ -151,7 +161,6 @@ namespace ft {
     };
 
 
-
     /*
      * Const Iterator for red-black tree
      */
@@ -169,10 +178,18 @@ namespace ft {
 
     private:
         explicit const_iterator_rbtree(pointer_node node) : current(node) {}
-        template <class> friend class map_iterator;
-        template <class, class, class> friend class rbtree;
-        template <class, class, class> friend class set;
-        template <class, class, class, class> friend class map;
+
+        template<class> friend
+        class map_iterator;
+
+        template<class, class, class> friend
+        class rbtree;
+
+        template<class, class, class> friend
+        class set;
+
+        template<class, class, class, class> friend
+        class map;
 
     public:
         const_iterator_rbtree() : current() {};
@@ -219,7 +236,104 @@ namespace ft {
             (*this)--;
             return *curr;
         }
+    };
 
+
+    /*
+     * Red-black tree
+     */
+    template<class T, class Compare, class Allocator>
+    class rbtree {
+
+    public:
+        /*
+         * Member types
+         */
+        typedef T value_type;
+        typedef Allocator allocator_type;
+        typedef typename allocator_type::size_type size_type;
+        typedef typename allocator_type::difference_type difference_type;
+        typedef Compare compare_value;
+        typedef rbnode<T> node;
+        typedef typename node::pointer_node pointer_node;
+        typedef iterator_rbtree<T, pointer_node> iterator;
+        typedef const_iterator_rbtree<T, pointer_node> const_iterator;
+
+    private:
+        /*
+         * Member types
+         * [begin_node] - first element for iteration; default - min
+         * [end_node] - last element for iteration; default - max
+         */
+        pointer_node root;
+        pointer_node begin_node;
+        pointer_node end_node;
+        allocator_type alloc;
+        compare_value compare;
+
+    public:
+        /*
+         * Constructors
+         */
+        rbtree(const rbtree &tree) : root(tree.root), begin_node(tree.begin_node), end_node(tree.end_node),
+                                     alloc(tree.alloc), compare(tree.compare) {};
+
+        explicit rbtree(compare_value const &compare, allocator_type const &alloc);
+
+
+        /*
+         * Destructor
+         */
+        ~rbtree() { this->clean(root); }
+
+
+        /*
+         * Member functions
+         */
+        pointer_node &get_tree_root() { return root; }
+
+        compare_value &get_compare_value() { return compare; }
+
+        allocator_type get_allocator_type() { return alloc; }
+
+        size_type max_size() const;
+
+        size_type size() const;
+
+        void insert(const value_type &val);
+
+        void remove(const value_type &val);
+
+        void clean(pointer_node &node);
+
+        void swap(rbtree &other);
+
+        template<class K>
+        pair<iterator, iterator> range_equal(const K &key);
+
+        template<class K>
+        iterator count(const K &key);
+
+        template<class K>
+        iterator find(const K &key);
+
+        template<class K>
+        iterator lower_bound(const K &key);
+
+        template<class K>
+        iterator upper_bound(const K &key);
+
+
+        /*
+         * Iterators
+         */
+        iterator begin();
+
+        const_iterator begin() const;
+
+        iterator end();
+
+        const_iterator end() const;
     };
 
 
