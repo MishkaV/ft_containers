@@ -22,4 +22,7 @@
 # include "ft_stack.hpp"
 # include "ft_pair.hpp"
 # include "ft_rbtree.hpp"
+# include "ft_set.hpp"
+# include "ft_map.hpp"
+
 #endif

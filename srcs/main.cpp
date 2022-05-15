@@ -211,4 +211,17 @@ int main() {
 
         std:: cout << "Top element(2) is " << stk.top() << "\n";
     }
+
+    //Set
+    {
+        std:: cout << "\nTEST 5\n";
+
+        ft::set<int> cool_set;
+        ft::set<int>::iterator it;
+
+        cool_set.insert(1);
+//        for (int i = 0; i < 10; i++)
+//            cool_set.insert(i);
+    }
+
 }

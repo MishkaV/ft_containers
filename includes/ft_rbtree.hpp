@@ -36,7 +36,7 @@ namespace ft {
         pointer_node left;
         pointer_node right;
         pointer_node parent;
-        pointer_node value;
+        value_type value;
 
     private:
         rbnode() {};
@@ -90,6 +90,7 @@ namespace ft {
         typedef PNode pointer_node;
         typedef value_type *pointer;
         typedef value_type &reference;
+        typedef bidirectional_iterator_tag iterator_category;
 
     private:
         pointer_node current;
@@ -121,11 +122,11 @@ namespace ft {
          * Operators
          */
         friend bool operator==(const iterator_rbtree &rhs, const iterator_rbtree &lhs) {
-            return rhs.ptr == lhs.ptr;
+            return rhs.current == lhs.current;
         }
 
         friend bool operator!=(const iterator_rbtree &rhs, const iterator_rbtree &lhs) {
-            return rhs.ptr != lhs.ptr;
+            return rhs.current != lhs.current;
         }
 
         reference operator->() const {
@@ -172,6 +173,7 @@ namespace ft {
         typedef PNode pointer_node;
         typedef value_type *pointer;
         typedef value_type &reference;
+        typedef bidirectional_iterator_tag iterator_category;
 
     private:
         pointer_node current;
@@ -200,11 +202,11 @@ namespace ft {
          * Operators
          */
         friend bool operator==(const const_iterator_rbtree &rhs, const const_iterator_rbtree &lhs) {
-            return rhs.ptr == lhs.ptr;
+            return rhs.current == lhs.current;
         }
 
         friend bool operator!=(const const_iterator_rbtree &rhs, const const_iterator_rbtree &lhs) {
-            return rhs.ptr != lhs.ptr;
+            return rhs.current != lhs.current;
         }
 
         reference operator->() const {
@@ -302,7 +304,7 @@ namespace ft {
         explicit rbtree(
                 compare_value const &compare,
                 allocator_type const &alloc
-        ) : compare(compare), alloc(alloc), root(0), begin_node(0), end_node(0), total_size(0) {};
+        ) : root(0), begin_node(0), end_node(0), total_size(0), alloc(alloc), compare(compare) {};
 
 
         /*
@@ -385,7 +387,7 @@ namespace ft {
         if (node && node->parent)
             return node->parent->parent;
         else
-            return NULL;
+            return 0;
     }
 
     template<class T, class Compare, class Allocator>
@@ -438,8 +440,14 @@ namespace ft {
 
     template<class T, class Compare, class Allocator>
     void rbtree<T, Compare, Allocator>::optimize_insertion(rbtree::pointer_node &node) {
-        pointer_node grandparent = get_grandparent(node);
-        pointer_node uncle = get_uncle(node);
+        pointer_node grandparent = node->parent->parent;
+        pointer_node uncle;
+        if (!grandparent)
+            uncle = NULL;
+        else if (node->parent == grandparent->left)
+            uncle = grandparent->right;
+        else
+            uncle = grandparent->left;
         pointer_node parent = node->parent;
 
         if (node == root) {
@@ -663,12 +671,12 @@ namespace ft {
     }
 
     template<class T, class Compare, class Allocator>
-    void rbtree<T, Compare, Allocator>::clean(rbtree::pointer_node &node) {
+    void rbtree<T, Compare, Allocator>::clean(pointer_node &node) {
         if (!node)
             return;
         clean(node->right);
         clean(node->left);
-        alloc.destroy(node->value);
+        alloc.destroy(&node->value);
         alloc.deallocate(reinterpret_cast<value_type *>(node), 1);
         node = 0;
         total_size = 0;
@@ -772,10 +780,10 @@ namespace ft {
     template<class K>
     typename rbtree<T, Compare, Allocator>::iterator
     rbtree<T, Compare, Allocator>::set_find(const K &key) {
-        iterator it = map_lower_bound(key);
+        iterator it = set_lower_bound(key);
         if (!compare(key, *it))
             return it;
-        return end_node;
+        return (iterator) end_node;
     }
 
     template<class T, class Compare, class Allocator>
@@ -809,7 +817,7 @@ namespace ft {
             } else
                 to_return = to_return->right;
         }
-        return to_return;
+        return (iterator) to_return;
     }
 
     template<class T, class Compare, class Allocator>
@@ -842,22 +850,22 @@ namespace ft {
      */
     template<class T, class Compare, class Allocator>
     typename rbtree<T, Compare, Allocator>::iterator rbtree<T, Compare, Allocator>::begin() {
-        return begin_node;
+        return (iterator) begin_node;
     }
 
     template<class T, class Compare, class Allocator>
     typename rbtree<T, Compare, Allocator>::const_iterator rbtree<T, Compare, Allocator>::begin() const {
-        return begin_node;
+        return (iterator) begin_node;
     }
 
     template<class T, class Compare, class Allocator>
     typename rbtree<T, Compare, Allocator>::iterator rbtree<T, Compare, Allocator>::end() {
-        return end_node;
+        return (iterator) end_node;
     }
 
     template<class T, class Compare, class Allocator>
     typename rbtree<T, Compare, Allocator>::const_iterator rbtree<T, Compare, Allocator>::end() const {
-        return end_node;
+        return (iterator) end_node;
     }
 
 }
