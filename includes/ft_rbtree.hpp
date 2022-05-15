@@ -272,6 +272,23 @@ namespace ft {
         allocator_type alloc;
         compare_value compare;
 
+        /*
+         * Extension functions for tree
+         */
+        pointer_node &get_grandparent(pointer_node &node);
+
+        pointer_node &get_uncle(pointer_node &node);
+
+        void left_rotation(pointer_node &node);
+
+        void right_rotation(pointer_node &node);
+
+        void optimize_insertion(pointer_node &node);
+
+
+        void optimize_removing(pointer_node &node);
+
+
     public:
         /*
          * Constructors
@@ -359,6 +376,120 @@ namespace ft {
 
 
     /*
+     * Extension functions for tree
+     */
+    template<class T, class Compare, class Allocator>
+    typename rbtree<T, Compare, Allocator>::pointer_node &
+    rbtree<T, Compare, Allocator>::get_grandparent(rbtree::pointer_node &node) {
+        if (node && node->parent)
+            return node->parent->parent;
+        else
+            return NULL;
+    }
+
+    template<class T, class Compare, class Allocator>
+    typename rbtree<T, Compare, Allocator>::pointer_node &
+    rbtree<T, Compare, Allocator>::get_uncle(rbtree::pointer_node &node) {
+        pointer_node grand_node = get_grandparent(node);
+        if (!grand_node)
+            return NULL;
+        if (node->parent == grand_node->left)
+            return grand_node->right;
+        else
+            return grand_node->left;
+    }
+
+    template<class T, class Compare, class Allocator>
+    void rbtree<T, Compare, Allocator>::left_rotation(rbtree::pointer_node &node) {
+        pointer_node curr = node->right;
+
+        curr->parent = node->parent;
+        if (node->parent) {
+            if (node->parent->left != node)
+                node->parent->right = curr;
+            else
+                node->parent->left = curr;
+        }
+        node->right = curr->left;
+        if (curr->left)
+            curr->left->parent = node;
+        node->parent = curr;
+        curr->left = node;
+    }
+
+    template<class T, class Compare, class Allocator>
+    void rbtree<T, Compare, Allocator>::right_rotation(rbtree::pointer_node &node) {
+        pointer_node curr = node->left;
+
+        curr->parent = node->parent;
+        if (node->parent) {
+            if (node->parent->left != node)
+                node->parent->right = curr;
+            else
+                node->parent->left = curr;
+        }
+        node->left = curr->right;
+        if (curr->right)
+            curr->right->parent = node;
+        node->parent = curr;
+        curr->right = node;
+    }
+
+    template<class T, class Compare, class Allocator>
+    void rbtree<T, Compare, Allocator>::optimize_insertion(rbtree::pointer_node &node) {
+        pointer_node grandparent = get_grandparent(node);
+        pointer_node uncle = get_uncle(node);
+        pointer_node parent = node->parent;
+
+        if (node == root) {
+            node->is_black = true;
+            return;
+        }
+
+        while (!parent->is_black) {
+            if (grandparent && parent == grandparent->left) {
+                if (uncle && !uncle->is_black) {
+                    parent->is_black = true;
+                    uncle->is_black = true;
+                    grandparent->is_black = false;
+                    node = grandparent;
+                } else {
+                    if (parent && node == parent->right) {
+                        node = parent;
+                        left_rotation(node);
+                    }
+                    parent->is_black = true;
+                    grandparent->is_black = false;
+                    right_rotation(grandparent);
+                }
+            } else {
+                if (uncle && !uncle->is_black) {
+                    parent->is_black = true;
+                    uncle->is_black = true;
+                    grandparent->is_black = false;
+                    node = grandparent;
+                } else {
+                    if (parent && node == parent->left) {
+                        node = node->parent;
+                        right_rotation(node);
+                    }
+                    parent->is_black = true;
+                    grandparent->is_black = false;
+                    left_rotation(grandparent);
+                }
+            }
+        }
+
+        root->is_black = true;
+    }
+
+    template<class T, class Compare, class Allocator>
+    void rbtree<T, Compare, Allocator>::optimize_removing(rbtree::pointer_node &node) {
+        //TODO
+    }
+
+
+    /*
      * Member functions
      */
     template<class T, class Compare, class Allocator>
@@ -369,7 +500,33 @@ namespace ft {
 
     template<class T, class Compare, class Allocator>
     void rbtree<T, Compare, Allocator>::insert(const value_type &val) {
-        //TODO
+        pointer_node new_node = reinterpret_cast<pointer_node>(this->alloc.allocate(sizeof(node)));
+        new_node->parent = new_node->left = new_node->right = NULL;
+        new_node->value = val;
+        new_node->is_black = false;
+
+        if (!root)
+            root = new_node;
+        else {
+            pointer_node parent = NULL;
+            pointer_node curr = root;
+            while (curr) {
+                parent = curr;
+                if (new_node->value < curr->value)
+                    curr = curr->left;
+                else
+                    curr = curr->right;
+            }
+            new_node->parent = parent;
+            if (parent->value < new_node->value)
+                parent->right = new_node;
+            else
+                parent->left = new_node;
+        }
+        optimize_insertion(new_node);
+        begin_node = min_node(root);
+        end_node = max_node(root);
+        total_size++;
     }
 
     template<class T, class Compare, class Allocator>
