@@ -268,6 +268,7 @@ namespace ft {
         pointer_node root;
         pointer_node begin_node;
         pointer_node end_node;
+        size_type total_size;
         allocator_type alloc;
         compare_value compare;
 
@@ -275,10 +276,15 @@ namespace ft {
         /*
          * Constructors
          */
-        rbtree(const rbtree &tree) : root(tree.root), begin_node(tree.begin_node), end_node(tree.end_node),
-                                     alloc(tree.alloc), compare(tree.compare) {};
+        rbtree(
+                const rbtree &tree
+        ) : root(tree.root), begin_node(tree.begin_node), end_node(tree.end_node), alloc(tree.alloc),
+            compare(tree.compare), total_size(tree.size) {};
 
-        explicit rbtree(compare_value const &compare, allocator_type const &alloc);
+        explicit rbtree(
+                compare_value const &compare,
+                allocator_type const &alloc
+        ) : compare(compare), alloc(alloc), root(0), begin_node(0), end_node(0), total_size(0) {};
 
 
         /*
@@ -298,7 +304,7 @@ namespace ft {
 
         size_type max_size() const;
 
-        size_type size() const;
+        size_type size() const { return total_size; }
 
         void insert(const value_type &val);
 
@@ -309,19 +315,34 @@ namespace ft {
         void swap(rbtree &other);
 
         template<class K>
-        pair<iterator, iterator> range_equal(const K &key);
+        iterator map_find(const K &key);
 
         template<class K>
-        iterator count(const K &key);
+        pair <iterator, iterator> map_range_equal(const K &key);
 
         template<class K>
-        iterator find(const K &key);
+        iterator map_count(const K &key);
 
         template<class K>
-        iterator lower_bound(const K &key);
+        iterator map_lower_bound(const K &key);
 
         template<class K>
-        iterator upper_bound(const K &key);
+        iterator map_upper_bound(const K &key);
+
+        template<class K>
+        iterator set_find(const K &key);
+
+        template<class K>
+        pair <iterator, iterator> set_range_equal(const K &key);
+
+        template<class K>
+        iterator set_count(const K &key);
+
+        template<class K>
+        iterator set_lower_bound(const K &key);
+
+        template<class K>
+        iterator set_upper_bound(const K &key);
 
 
         /*
@@ -337,6 +358,222 @@ namespace ft {
     };
 
 
+    /*
+     * Member functions
+     */
+    template<class T, class Compare, class Allocator>
+    typename rbtree<T, Compare, Allocator>::size_type
+    rbtree<T, Compare, Allocator>::max_size() const {
+        return std::min<T>(std::numeric_limits<size_type>::max(), this->alloc.max_size());;
+    }
+
+    template<class T, class Compare, class Allocator>
+    void rbtree<T, Compare, Allocator>::insert(const value_type &val) {
+        //TODO
+    }
+
+    template<class T, class Compare, class Allocator>
+    void rbtree<T, Compare, Allocator>::remove(const value_type &val) {
+        //TODO
+    }
+
+    template<class T, class Compare, class Allocator>
+    void rbtree<T, Compare, Allocator>::clean(rbtree::pointer_node &node) {
+        if (!node)
+            return;
+        clean(node->right);
+        clean(node->left);
+        alloc.destroy(node->value);
+        alloc.deallocate(reinterpret_cast<value_type *>(node), 1);
+        node = 0;
+        total_size = 0;
+        begin_node = min_node(root);
+        end_node = max_node(root); //TODO?
+    }
+
+    template<class T, class Compare, class Allocator>
+    void rbtree<T, Compare, Allocator>::swap(rbtree &other) {
+        pointer_node new_root = other.root;
+        pointer_node new_begin_node = other.begin_noder;
+        pointer_node new_end_node = other.end_node;
+        size_type new_total_size = other.total_size;
+        allocator_type new_alloc = other.alloc;
+        compare_value new_compare = other.compare;
+
+        other.root = root;
+        other.begin_noder = begin_node;
+        other.end_node = end_node;
+        other.total_size = total_size;
+        other.alloc = alloc;
+        other.compare = compare;
+
+        root = new_root;
+        begin_node = new_begin_node;
+        end_node = new_end_node;
+        total_size = new_total_size;
+        alloc = new_alloc;
+        compare = new_compare;
+    }
+
+    template<class T, class Compare, class Allocator>
+    template<class K>
+    typename rbtree<T, Compare, Allocator>::iterator
+    rbtree<T, Compare, Allocator>::map_find(const K &key) {
+        iterator it = map_lower_bound(key);
+        if (!compare(key, (*it).first))
+            return it;
+        return end_node;
+    }
+
+    template<class T, class Compare, class Allocator>
+    template<class K>
+    pair<typename rbtree<T, Compare, Allocator>::iterator, typename rbtree<T, Compare, Allocator>::iterator>
+    rbtree<T, Compare, Allocator>::map_range_equal(const K &key) {
+        return pair<iterator, iterator>(map_lower_bound(key), map_upper_bound(key));
+    }
+
+    template<class T, class Compare, class Allocator>
+    template<class K>
+    typename rbtree<T, Compare, Allocator>::iterator
+    rbtree<T, Compare, Allocator>::map_count(const K &key) {
+        pointer_node curr = root;
+
+        while (curr) {
+            if (compare(curr->value.first, key))
+                curr = curr->right;
+            else if (compare(key, curr->value.first))
+                curr = curr->left;
+            else
+                return 1;
+        }
+        return 0;
+    }
+
+    template<class T, class Compare, class Allocator>
+    template<class K>
+    typename rbtree<T, Compare, Allocator>::iterator
+    rbtree<T, Compare, Allocator>::map_lower_bound(const K &key) {
+        pointer_node curr = root;
+        pointer_node to_return = end_node;
+
+        while (curr) {
+            if (!compare(curr->value.first, key)) {
+                to_return = curr;
+                to_return = to_return->left;
+            } else
+                to_return = to_return->right;
+        }
+        return to_return;
+    }
+
+    template<class T, class Compare, class Allocator>
+    template<class K>
+    typename rbtree<T, Compare, Allocator>::iterator
+    rbtree<T, Compare, Allocator>::map_upper_bound(const K &key) {
+        pointer_node curr = root;
+        pointer_node to_return = end_node;
+
+        while (curr) {
+            if (compare(curr->value.first, key)) {
+                to_return = curr;
+                to_return = to_return->left;
+            } else
+                to_return = to_return->right;
+        }
+        return to_return;
+    }
+
+    template<class T, class Compare, class Allocator>
+    template<class K>
+    typename rbtree<T, Compare, Allocator>::iterator
+    rbtree<T, Compare, Allocator>::set_find(const K &key) {
+        iterator it = map_lower_bound(key);
+        if (!compare(key, *it))
+            return it;
+        return end_node;
+    }
+
+    template<class T, class Compare, class Allocator>
+    template<class K>
+    typename rbtree<T, Compare, Allocator>::iterator
+    rbtree<T, Compare, Allocator>::set_count(const K &key) {
+        pointer_node curr = root;
+
+        while (curr) {
+            if (compare(curr->value, key))
+                curr = curr->right;
+            else if (compare(key, curr->value))
+                curr = curr->left;
+            else
+                return 1;
+        }
+        return 0;
+    }
+
+    template<class T, class Compare, class Allocator>
+    template<class K>
+    typename rbtree<T, Compare, Allocator>::iterator
+    rbtree<T, Compare, Allocator>::set_lower_bound(const K &key) {
+        pointer_node curr = root;
+        pointer_node to_return = end_node;
+
+        while (curr) {
+            if (!compare(curr->value, key)) {
+                to_return = curr;
+                to_return = to_return->left;
+            } else
+                to_return = to_return->right;
+        }
+        return to_return;
+    }
+
+    template<class T, class Compare, class Allocator>
+    template<class K>
+    typename rbtree<T, Compare, Allocator>::iterator
+    rbtree<T, Compare, Allocator>::set_upper_bound(const K &key) {
+        pointer_node curr = root;
+        pointer_node to_return = end_node;
+
+        while (curr) {
+            if (compare(curr->value, key)) {
+                to_return = curr;
+                to_return = to_return->left;
+            } else
+                to_return = to_return->right;
+        }
+        return to_return;
+    }
+
+    template<class T, class Compare, class Allocator>
+    template<class K>
+    pair<typename rbtree<T, Compare, Allocator>::iterator, typename rbtree<T, Compare, Allocator>::iterator>
+    rbtree<T, Compare, Allocator>::set_range_equal(const K &key) {
+        return pair<iterator, iterator>(set_lower_bound(key), set_upper_bound(key));
+    }
+
+
+    /*
+     * Iterators
+     */
+    template<class T, class Compare, class Allocator>
+    typename rbtree<T, Compare, Allocator>::iterator rbtree<T, Compare, Allocator>::begin() {
+        return begin_node;
+    }
+
+    template<class T, class Compare, class Allocator>
+    typename rbtree<T, Compare, Allocator>::const_iterator rbtree<T, Compare, Allocator>::begin() const {
+        return begin_node;
+    }
+
+    template<class T, class Compare, class Allocator>
+    typename rbtree<T, Compare, Allocator>::iterator rbtree<T, Compare, Allocator>::end() {
+        return end_node;
+    }
+
+    template<class T, class Compare, class Allocator>
+    typename rbtree<T, Compare, Allocator>::const_iterator rbtree<T, Compare, Allocator>::end() const {
+        return end_node;
+    }
 }
 
 #endif
