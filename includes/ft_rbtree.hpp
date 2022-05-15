@@ -285,8 +285,9 @@ namespace ft {
 
         void optimize_insertion(pointer_node &node);
 
+        void optimize_removing(rbtree::pointer_node &curr, pointer_node &parent);
 
-        void optimize_removing(pointer_node &node);
+        void removing_both_child(pointer_node &node);
 
 
     public:
@@ -484,8 +485,93 @@ namespace ft {
     }
 
     template<class T, class Compare, class Allocator>
-    void rbtree<T, Compare, Allocator>::optimize_removing(rbtree::pointer_node &node) {
-        //TODO
+    void rbtree<T, Compare, Allocator>::optimize_removing(
+            rbtree::pointer_node &curr,
+            rbtree::pointer_node &parent
+    ) {
+        while ((curr->is_black && curr != root) || curr) {
+            if (parent->left == curr) {
+                if (!parent->right->is_black) {
+                    parent->right->is_black = true;
+                    parent->is_black = false;
+                    left_rotation(parent);
+                }
+                if (parent->right->right->is_black && parent->right->left->is_black)
+                    parent->right->is_black = false;
+                else {
+                    if (parent->right->right->is_black) {
+                        parent->right->left->is_black = true;
+                        parent->right->is_black = false;
+                        right_rotation(parent->right);
+                    }
+                    parent->right->is_black = parent->is_black;
+                    parent->is_black = true;
+                    parent->right->right->is_black = true;
+                    left_rotation(parent);
+                    curr = root;
+                }
+            } else {
+                pointer_node brother = parent->left;
+                if (!brother->is_black) {
+                    brother->is_black = true;
+                    parent->is_black = false;
+                    left_rotation(curr.parent);
+                }
+                if (brother->right->is_black && brother->left->is_black)
+                    brother->is_black = false;
+                else {
+                    if (brother->left->is_black) {
+                        brother->right->is_black = true;
+                        brother->is_black = false;
+                        right_rotation(brother);
+                    }
+                    brother = parent;
+                    parent->is_black = true;
+                    brother->left->is_black = true;
+                    right_rotation(curr->parent);
+                    curr = root;
+                }
+            }
+        }
+        curr->is_black = true;
+        root->is_black = true;
+    }
+
+    template<class T, class Compare, class Allocator>
+    void rbtree<T, Compare, Allocator>::removing_both_child(rbtree::pointer_node &node) {
+        pointer_node rep = node->right;
+
+        while (rep->left)
+            rep = rep->left;
+        if (node->parent) {
+            if (node->parent->left == node)
+                node->parent->left = rep;
+            else
+                node->parent->right = rep;
+        } else
+            root = rep;
+
+        pointer_node children = rep->right;
+        pointer_node parent = rep->parent;
+        bool color = rep->is_black;
+
+        if (parent == node)
+            parent = rep;
+        else {
+            if (children)
+                children->parent = parent;
+            parent->left = children;
+            rep->right = node->right;
+            node->right->parent = rep;
+        }
+        rep->parent = node->parent;
+        rep->is_black = node->is_black;
+        rep->left = node->left;
+        node->left->parent = rep;
+        if (color)
+            optimize_removing(children, parent);
+        alloc.destroy(&node->value);
+        alloc.deallocate(reinterpret_cast<value_type *>(node), 1);
     }
 
 
@@ -531,7 +617,49 @@ namespace ft {
 
     template<class T, class Compare, class Allocator>
     void rbtree<T, Compare, Allocator>::remove(const value_type &val) {
-        //TODO
+        pointer_node curr = root;
+        pointer_node parent = 0;
+        pointer_node childer = 0;
+        bool color;
+
+        while (curr && curr->value != val) {
+            parent = curr;
+            if (curr->value < val)
+                curr = curr->right;
+            else
+                curr = curr->left;
+        }
+
+        if (!curr)
+            return;
+        if (curr->left && curr->right)
+            removing_both_child(curr);
+        if (curr->left)
+            childer = curr->left;
+        else
+            childer = curr->right;
+
+        parent = curr->parent;
+        color = curr->is_black;
+
+        if (childer)
+            childer->parent = parent;
+        if (parent) {
+            if (curr == parent->left)
+                parent->left = childer;
+            else
+                parent->right = childer;
+        } else
+            root = childer;
+
+        if (color)
+            optimize_removing(childer, parent);
+
+        alloc.destroy(&curr->value);
+        alloc.deallocate(reinterpret_cast<value_type *>(curr), 1);
+        total_size--;
+        begin_node = min_node(root);
+        end_node = max_node(root);
     }
 
     template<class T, class Compare, class Allocator>
@@ -731,6 +859,7 @@ namespace ft {
     typename rbtree<T, Compare, Allocator>::const_iterator rbtree<T, Compare, Allocator>::end() const {
         return end_node;
     }
+
 }
 
 #endif
