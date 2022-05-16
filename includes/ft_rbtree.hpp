@@ -781,7 +781,7 @@ namespace ft {
     typename rbtree<T, Compare, Allocator>::iterator
     rbtree<T, Compare, Allocator>::set_find(const K &key) {
         iterator it = set_lower_bound(key);
-        if (!compare(key, *it))
+        if (it != end() && !compare(key, *it))
             return it;
         return (iterator) end_node;
     }
